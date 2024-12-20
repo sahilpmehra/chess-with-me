@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import chess
-from engine_v1.ChessEngine import ChessEngine as ChessEngineV1
+from engine.ChessEngine import ChessEngine as ChessEngine
+from engine_v3.ChessEngine import ChessEngine as ChessEngineV3
 from engine_v2.ChessEngine import ChessEngine as ChessEngineV2
 
 app = FastAPI()
@@ -24,13 +25,14 @@ class MoveRequest(BaseModel):
 class MoveResponse(BaseModel):
     move: str
 
-engine1 = ChessEngineV1()
+engine = ChessEngine()
+engine1 = ChessEngineV3()
 engine2 = ChessEngineV2()
-engines = [engine1, engine2]
+engines = [engine, engine1, engine2]
 
 @app.post("/get-move")
 async def get_move(request: MoveRequest) -> MoveResponse:
     board = chess.Board(request.fen)
-    engine = engines[request.engine_version - 1]
+    engine = engines[request.engine_version]
     best_move = engine.get_best_move(board, request.depth)
     return MoveResponse(move=str(best_move)) 

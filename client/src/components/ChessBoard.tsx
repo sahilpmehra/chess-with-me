@@ -10,7 +10,7 @@ const ChessBoard = () => {
   const [isThinking, setIsThinking] = useState(false);
   const [gameMode, setGameMode] = useState<GameMode>("human");
   const [currentEngine, setCurrentEngine] = useState(1);
-  const [moveDelay] = useState(1000); // 1 second delay between moves in engine vs engine
+  const [moveDelay] = useState(100); // 1 second delay between moves in engine vs engine
   const [gameResult, setGameResult] = useState<string>("");
 
   const getEngineMove = async (engineVersion: number) => {
@@ -23,7 +23,7 @@ const ChessBoard = () => {
         },
         body: JSON.stringify({
           fen: game.fen(),
-          depth: 5,
+          depth: 4, // TODO: make this dynamic
           engine_version: engineVersion
         }),
       });
@@ -35,7 +35,7 @@ const ChessBoard = () => {
       if (game.isGameOver()) {
         let result = "";
         if (game.isCheckmate()) {
-          result = game.turn() === 'w' ? "Black (Engine 2) wins!" : "White (Engine 1) wins!";
+          result = game.turn() === 'w' ? "Black wins!" : "White wins!";
         } else if (game.isDraw()) {
           result = "Game drawn!";
           if (game.isStalemate()) {
@@ -65,7 +65,7 @@ const ChessBoard = () => {
       setBoard(game.board());
 
       if (!game.isGameOver() && gameMode === "human") {
-        getEngineMove(1); // Use engine 1 against human
+        getEngineMove(0); // Use engine 0 against human
       }
     } catch (error) {
       console.log("Invalid Move!");
@@ -82,7 +82,7 @@ const ChessBoard = () => {
 
     if (mode === "engine") {
       setCurrentEngine(1);
-      getEngineMove(1);
+      getEngineMove(currentEngine);
     }
   };
 
@@ -100,6 +100,12 @@ const ChessBoard = () => {
 
       if (from === toNotation) {
         setFrom(null);
+        return;
+      }
+
+      // If destination has a piece of same color, select that piece instead
+      if (square && square.color === 'w') {
+        setFrom(toNotation);
         return;
       }
 
@@ -175,7 +181,7 @@ const ChessBoard = () => {
         {isThinking && gameMode === "human" && "Engine is thinking..."}
         {isThinking && gameMode === "engine" && `Engine ${currentEngine} is thinking...`}
         {!isThinking && gameMode === "human" && "Human's turn"}
-        {!isThinking && gameMode === "engine" && `Engine ${currentEngine === 1 ? 2 : 1}'s turn`}
+        {!isThinking && gameMode === "engine" && `Engine ${3 - currentEngine}'s turn` /*  Reverse the engine number, i.e. 1 -> 2, 2 -> 1 */}
         {gameResult && <div className="font-bold text-xl">{gameResult}</div>}
       </div>
 
