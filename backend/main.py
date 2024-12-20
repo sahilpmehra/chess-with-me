@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import chess
 from engine.ChessEngine import ChessEngine as ChessEngine
-from engine_v3.ChessEngine import ChessEngine as ChessEngineV3
+from engine_v1.ChessEngine import ChessEngine as ChessEngineV1
 from engine_v2.ChessEngine import ChessEngine as ChessEngineV2
 
 app = FastAPI()
@@ -26,7 +26,7 @@ class MoveResponse(BaseModel):
     move: str
 
 engine = ChessEngine()
-engine1 = ChessEngineV3()
+engine1 = ChessEngineV1()
 engine2 = ChessEngineV2()
 engines = [engine, engine1, engine2]
 
